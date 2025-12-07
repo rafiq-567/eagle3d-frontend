@@ -1,0 +1,14 @@
+'use client';
+
+import ProductList from "@/src/products/ProductList";
+
+// import ProductList from '../../src/products/ProductList';
+
+export default function ProductsPage() {
+    return (
+        <div className="p-6">
+            <h1 className="text-3xl font-bold mb-4">Products</h1>
+            <ProductList />
+        </div>
+    );
+}
