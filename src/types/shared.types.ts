@@ -7,12 +7,21 @@ export interface UserPayload {
 
 
 export interface Product {
-    id: string; 
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  stock: number;
+  category?: string;
+  imageUrl?: string;
+  createdAt?: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
+  updatedAt?: {
+    _seconds: number;
+    _nanoseconds: number;
+  };
 }
 
 

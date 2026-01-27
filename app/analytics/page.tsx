@@ -2,30 +2,39 @@
 'use client';
 
 import React, { useMemo } from 'react';
-
+import { ReactNode } from 'react';
 import { useGetProductsQuery } from '../../src/services/productApi';
 import { DollarSign, Package, TrendingUp, XCircle, Loader2 } from 'lucide-react';
 
 import { Product } from '../../src/types/shared.types';
 
 
-const Card = ({ children, className = '' }) => (
+interface CardProps {
+    children: ReactNode;
+    className?: string;
+}
+
+const Card = ({ children, className = '' }: CardProps) => (
     <div className={`rounded-xl border bg-white shadow-sm dark:bg-gray-800 ${className}`}>
         {children}
     </div>
 );
-const CardHeader = ({ children, className = '' }) => (
+
+const CardHeader = ({ children, className = '' }: CardProps) => (
     <div className={`flex flex-col space-y-1.5 p-6 ${className}`}>{children}</div>
 );
-const CardTitle = ({ children, className = '' }) => (
+
+const CardTitle = ({ children, className = '' }: CardProps) => (
     <h3 className={`font-semibold tracking-tight text-xl text-gray-900 dark:text-white ${className}`}>
         {children}
     </h3>
 );
-const CardDescription = ({ children, className = '' }) => (
+
+const CardDescription = ({ children, className = '' }: CardProps) => (
     <p className={`text-sm text-gray-500 dark:text-gray-400 ${className}`}>{children}</p>
 );
-const CardContent = ({ children, className = '' }) => (
+
+const CardContent = ({ children, className = '' }: CardProps) => (
     <div className={`p-6 pt-0 ${className}`}>{children}</div>
 );
 
@@ -66,11 +75,9 @@ const BarChart: React.FC<ChartProps> = ({ data, index, categories, colors, value
 
                 return (
                     <div key={i} className="flex items-center space-x-3">
-
                         <div className="w-24 text-sm text-gray-600 dark:text-gray-300 font-medium truncate">
                             {item[index]}
                         </div>
-
                         <div className="flex-1 flex items-center">
                             <div
                                 style={{ width: `${percentage}%`, minWidth: '4px' }}
@@ -88,7 +95,6 @@ const BarChart: React.FC<ChartProps> = ({ data, index, categories, colors, value
 };
 
 
-
 const LineChart: React.FC<ChartProps> = ({ data, index, categories, colors, valueFormatter, className = '' }) => {
     if (!data || data.length < 2) return <div className="text-center py-10 text-gray-500">Need more data for line chart.</div>;
 
@@ -96,7 +102,6 @@ const LineChart: React.FC<ChartProps> = ({ data, index, categories, colors, valu
     const values = data.map(item => item[categoryKey] as number);
     const maxVal = Math.max(...values);
     const minVal = Math.min(...values);
-
 
     const points = values.map((val, i) => {
         const x = (i / (values.length - 1)) * 100;
@@ -115,11 +120,9 @@ const LineChart: React.FC<ChartProps> = ({ data, index, categories, colors, valu
 
     return (
         <div className={`relative h-64 w-full ${className}`}>
-
             <div className="absolute inset-0 border-y border-dashed border-gray-300 dark:border-gray-700">
                 <div className="absolute top-1/2 w-full border-b border-dashed border-gray-300 dark:border-gray-700"></div>
             </div>
-
 
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full absolute" style={{ padding: '10px 0' }}>
                 <polyline
@@ -133,9 +136,7 @@ const LineChart: React.FC<ChartProps> = ({ data, index, categories, colors, valu
                 />
             </svg>
 
-
             <div className="absolute bottom-0 left-0 right-0 flex justify-between px-2 text-xs text-gray-600 dark:text-gray-400 font-medium">
-
                 {data.map((item, i) => (
                     <span key={i} className="text-center w-1/5 pt-2 text-sm">{item[index]}</span>
                 ))}
@@ -143,7 +144,6 @@ const LineChart: React.FC<ChartProps> = ({ data, index, categories, colors, valu
         </div>
     );
 };
-
 
 
 interface AnalyticsData {
@@ -166,7 +166,6 @@ const aggregateData = (products: Product[]): AnalyticsData => {
     const stockValueByStatus: { [key: string]: number } = { Available: 0, Discontinued: 0 };
     const priceRangeCounts: { [key: string]: number } = {};
 
-
     const mockMonthlyFlow = [
         { month: 'January', added: 10 },
         { month: 'February', added: 15 },
@@ -177,7 +176,6 @@ const aggregateData = (products: Product[]): AnalyticsData => {
     let totalProducts = products.length;
 
     products.forEach(product => {
-
         const price = product.price || 0;
         const stock = product.stock || 0;
 
@@ -185,18 +183,19 @@ const aggregateData = (products: Product[]): AnalyticsData => {
         totalValue += value;
         totalStock += stock;
 
-
-        const status = product.status;
+        // Determine status based on stock availability
+        const status = stock > 0 ? 'Available' : 'Discontinued';
+        
         if (status === 'Available') {
             availableCount++;
-        } else if (status === 'Discontinued') {
+        } else {
             discontinuedCount++;
         }
 
         const statusKey = status === 'Available' ? 'Available' : 'Discontinued';
         stockValueByStatus[statusKey] = (stockValueByStatus[statusKey] || 0) + value;
 
-
+        // Price range categorization
         let range;
         if (price < 100) range = '$0-100';
         else if (price < 500) range = '$100-500';
@@ -207,7 +206,6 @@ const aggregateData = (products: Product[]): AnalyticsData => {
         priceRangeCounts[range] = (priceRangeCounts[range] || 0) + 1;
     });
 
-
     const orderedRanges = ['$0-100', '$100-500', '$500-1K', '$1K-5K', '$5K+'];
     const priceDistribution = orderedRanges
         .map(range => ({
@@ -215,7 +213,6 @@ const aggregateData = (products: Product[]): AnalyticsData => {
             count: priceRangeCounts[range] || 0
         }))
         .filter(item => item.count > 0);
-
 
     return {
         totalValue: totalValue,
@@ -233,13 +230,10 @@ const aggregateData = (products: Product[]): AnalyticsData => {
 };
 
 
-
 export default function AnalyticsPage() {
-
     const { data: products, isLoading, isError } = useGetProductsQuery();
 
     const analytics = useMemo(() => {
-
         return aggregateData(products || []);
     }, [products]);
 
@@ -256,14 +250,12 @@ export default function AnalyticsPage() {
         return (
             <div className="text-red-500 p-6 border border-red-200 rounded-lg max-w-xl mx-auto mt-10 flex items-center">
                 <XCircle className="h-6 w-6 mr-3" />
-                Failed to load data.
-                $\text{API}$ connection or server $\text{status}$ check out
-
+                Failed to load data. API connection or server status check out
             </div>
         );
     }
 
-    // Format BDT in millions/thousands
+    // Format currency in millions/thousands
     const formatCurrency = (amount: number): string => {
         if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
         if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}K`;
@@ -272,11 +264,10 @@ export default function AnalyticsPage() {
 
     return (
         <div className="p-4 md:p-8 space-y-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
-            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white border-b pb-2">Dashboard Analytics (Analytics)</h1>
-            <CardDescription className="text-lg">Real-time analysis of product inventory and stock.
-            </CardDescription>
+            <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white border-b pb-2">Dashboard Analytics</h1>
+            <CardDescription className="text-lg">Real-time analysis of product inventory and stock.</CardDescription>
 
-            {/* Kicker Metrics */}
+            {/* Key Metrics */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="hover:shadow-xl transition duration-300 border-l-4 border-green-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -285,8 +276,7 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(analytics.totalValue)}</div>
-                        <p className="text-xs text-muted-foreground pt-1">Current market price of all products
-                        </p>
+                        <p className="text-xs text-muted-foreground pt-1">Current market price of all products</p>
                     </CardContent>
                 </Card>
                 <Card className="hover:shadow-xl transition duration-300 border-l-4 border-blue-500">
@@ -295,18 +285,17 @@ export default function AnalyticsPage() {
                         <Package className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.totalStock.toLocaleString('bn-BD')} </div>
-                        <p className="text-xs text-muted-foreground pt-1">Toatl product in warehouse</p>
+                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.totalStock.toLocaleString('bn-BD')}</div>
+                        <p className="text-xs text-muted-foreground pt-1">Total product in warehouse</p>
                     </CardContent>
                 </Card>
                 <Card className="hover:shadow-xl transition duration-300 border-l-4 border-indigo-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Available for sale
-                        </CardTitle>
+                        <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">Available for sale</CardTitle>
                         <TrendingUp className="h-4 w-4 text-indigo-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.availableCount} </div>
+                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.availableCount}</div>
                         <p className="text-xs text-muted-foreground pt-1">{analytics.totalProducts > 0 ? ((analytics.availableCount / analytics.totalProducts) * 100).toFixed(1) : 0}% Total Product</p>
                     </CardContent>
                 </Card>
@@ -316,9 +305,8 @@ export default function AnalyticsPage() {
                         <XCircle className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.discontinuedCount} </div>
-                        <p className="text-xs text-muted-foreground pt-1">Unavailable products for sale
-                        </p>
+                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{analytics.discontinuedCount}</div>
+                        <p className="text-xs text-muted-foreground pt-1">Unavailable products for sale</p>
                     </CardContent>
                 </Card>
             </div>
@@ -328,17 +316,15 @@ export default function AnalyticsPage() {
                 {/* Chart 1: Price Distribution */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Product price distribution
-                        </CardTitle>
-                        <CardDescription>Number of products in different price ranges.
-                        </CardDescription>
+                        <CardTitle>Product price distribution</CardTitle>
+                        <CardDescription>Number of products in different price ranges.</CardDescription>
                     </CardHeader>
                     <CardContent className="h-80">
                         <BarChart
                             data={analytics.priceDistribution}
                             index="priceRange"
                             categories={['count']}
-                            colors={['#3b82f6']} // Blue
+                            colors={['#3b82f6']}
                             valueFormatter={(value) => `${value} product`}
                             yAxisLabel="Number of product"
                             className="p-4"
@@ -349,17 +335,15 @@ export default function AnalyticsPage() {
                 {/* Chart 2: Inventory Value by Status */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Inventory value by status
-                        </CardTitle>
-                        <CardDescription>Total value of available vs. closed products.
-                        </CardDescription>
+                        <CardTitle>Inventory value by status</CardTitle>
+                        <CardDescription>Total value of available vs. closed products.</CardDescription>
                     </CardHeader>
                     <CardContent className="h-80">
                         <BarChart
                             data={analytics.stockValueByStatus}
                             index="name"
                             categories={['value']}
-                            colors={['#10b981', '#f87171']} // Green, Red
+                            colors={['#10b981', '#f87171']}
                             valueFormatter={formatCurrency}
                             yAxisLabel="Total price ($)"
                             className="p-4"
@@ -367,20 +351,18 @@ export default function AnalyticsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Chart 3: Product Flow Over Time (Mock Data) */}
+                {/* Chart 3: Product Flow Over Time */}
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Trend of new products being added
-                            (monthly)</CardTitle>
-                        <CardDescription>Number of products added in the last few months.
-                        </CardDescription>
+                        <CardTitle>Trend of new products being added (monthly)</CardTitle>
+                        <CardDescription>Number of products added in the last few months.</CardDescription>
                     </CardHeader>
                     <CardContent className="h-96">
                         <LineChart
                             data={analytics.monthlyProductFlow}
                             index="month"
                             categories={['added']}
-                            colors={['#8b5cf6']} // Indigo
+                            colors={['#8b5cf6']}
                             valueFormatter={(value) => `${value} product`}
                             yAxisLabel="added product"
                             className="p-4"

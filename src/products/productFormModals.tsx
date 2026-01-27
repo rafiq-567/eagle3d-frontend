@@ -2,17 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, X, PlusCircle, Save } from 'lucide-react';
-
-import { useAddProductMutation, useUpdateProductMutation } from '../../src/services/productApi.ts';
-import { Product, AddProductPayload } from '../../types/shared.types';
-
+import { AddProductPayload, Product } from '../types/shared.types';
+import { useAddProductMutation, useUpdateProductMutation } from '../services/productApi';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   productToEdit: Product | null; 
 }
-
 
 const initialFormState: AddProductPayload = {
   name: '',
@@ -26,44 +23,49 @@ export default function ProductFormModal({
   onClose, 
   productToEdit 
 }: ProductFormModalProps) {
-  const [formData, setFormData] = useState<AddProductPayload>(initialFormState);
+  const isEditMode = !!productToEdit;
+  
+  // Initialize form data based on edit mode
+  const getInitialFormData = (): AddProductPayload => {
+    if (isEditMode && productToEdit) {
+      return {
+        name: productToEdit.name,
+        description: productToEdit.description || '',
+        price: productToEdit.price,
+        stock: productToEdit.stock,
+      };
+    }
+    return initialFormState;
+  };
+
+  const [formData, setFormData] = useState<AddProductPayload>(getInitialFormData);
   
   // RTK Query Mutations
   const [addProduct, { isLoading: isAdding, isSuccess: isAddSuccess }] = useAddProductMutation();
   const [updateProduct, { isLoading: isUpdating, isSuccess: isUpdateSuccess }] = useUpdateProductMutation();
   
-  const isEditMode = !!productToEdit;
   const isLoading = isAdding || isUpdating;
 
- 
+  // Reset form when modal opens/closes or when productToEdit changes
   useEffect(() => {
-    if (isEditMode) {
-      setFormData({
-        name: productToEdit.name,
-        description: productToEdit.description,
-        price: productToEdit.price,
-        stock: productToEdit.stock,
-      });
-    } else {
-      setFormData(initialFormState);
+    if (isOpen) {
+      setFormData(getInitialFormData());
     }
-  }, [productToEdit, isEditMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, productToEdit?.id]); // Only depend on modal state and product ID
 
- 
+  // Close modal on success
   useEffect(() => {
     if (isAddSuccess || isUpdateSuccess) {
       onClose();
-     
-      setFormData(initialFormState); 
+      setFormData(initialFormState);
     }
   }, [isAddSuccess, isUpdateSuccess, onClose]);
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-    
       [name]: name === 'price' || name === 'stock' ? Number(value) : value,
     }));
   };
@@ -73,25 +75,19 @@ export default function ProductFormModal({
 
     try {
       if (isEditMode && productToEdit) {
-     
         await updateProduct({ id: productToEdit.id, data: formData }).unwrap();
       } else {
-        
         await addProduct(formData).unwrap();
       }
     } catch (error) {
       console.error('Failed to save product:', error);
-      
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    
     <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 p-4">
-      
-     
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-3xl w-full max-w-lg transform transition-all overflow-hidden">
         
         {/* Modal Header */}
@@ -102,7 +98,7 @@ export default function ProductFormModal({
             ) : (
               <PlusCircle className="w-5 h-5 mr-2 text-green-500" />
             )}
-            {isEditMode ? 'Edit the product' : 'add new  product'}
+            {isEditMode ? 'Edit the product' : 'Add new product'}
           </h3>
           <button
             type="button"
@@ -118,7 +114,7 @@ export default function ProductFormModal({
         {/* Modal Body (Form) */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           
-  
+          {/* Product Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Product name
@@ -135,10 +131,10 @@ export default function ProductFormModal({
             />
           </div>
 
-          
+          {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Detaild description
+              Detailed description
             </label>
             <textarea
               id="description"
@@ -153,10 +149,10 @@ export default function ProductFormModal({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-           
+            {/* Price */}
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                price
+                Price
               </label>
               <input
                 id="price"
@@ -172,10 +168,10 @@ export default function ProductFormModal({
               />
             </div>
 
-            
+            {/* Stock */}
             <div>
               <label htmlFor="stock" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                stock number
+                Stock number
               </label>
               <input
                 id="stock"
