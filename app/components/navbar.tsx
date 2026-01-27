@@ -35,11 +35,13 @@ export default function Navbar() {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleLogout = async () => {
-    await fetch("http://localhost:5000/api/auth/logout", {
+ const handleLogout = async () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    await fetch(`${apiUrl}/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
+};
 
     router.push("/login");
   };

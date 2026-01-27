@@ -11,7 +11,8 @@ export default function HydrateAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await fetch(`${apiUrl}/auth/me`, {
           credentials: 'include',
         });
 
