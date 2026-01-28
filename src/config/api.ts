@@ -1,5 +1,7 @@
+// src/config/api.ts
 export const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+  // Always use the backend URL directly (no proxy for now)
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://eagle3d-backend-12.onrender.com/api',
   
   endpoints: {
     auth: {
@@ -18,6 +20,10 @@ export const API_CONFIG = {
   },
   
   getURL: (endpoint: string) => {
+    return `${API_CONFIG.baseURL}${endpoint}`;
+  },
+
+  getFullURL: (endpoint: string) => {
     return `${API_CONFIG.baseURL}${endpoint}`;
   }
 };

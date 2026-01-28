@@ -1,44 +1,6 @@
-
-
-// import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
-// export const authApi = createApi({
-//   reducerPath: 'authApi',
-//   baseQuery: fetchBaseQuery({
-//     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
-//     credentials: 'include', // IMPORTANT: send session cookie
-//   }),
-//   tagTypes: ['Auth'],
-//   endpoints: (build) => ({
-//     login: build.mutation<
-//       { message: string; user: { email: string; role: string } },
-//       { idToken: string }
-//     >({
-//       query: (body) => ({
-//         url: '/auth/login',
-//         method: 'POST',
-//         body,
-//       }),
-//     }),
-
-//     logout: build.mutation<{ message: string }, void>({
-//       query: () => ({
-//         url: '/auth/logout',
-//         method: 'POST',
-//       }),
-//     }),
-
-//     me: build.query<{ user: { email: string; role: string } }, void>({
-//       query: () => '/auth/me',
-//       providesTags: ['Auth'],
-//     }),
-//   }),
-// });
-
-// export const { useLoginMutation, useLogoutMutation, useMeQuery } = authApi;
-
-
+// src/services/authApi.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { UserPayload } from '../types/shared.types';
 import { API_CONFIG } from '../config/api';
 
 export const authApi = createApi({
@@ -48,28 +10,23 @@ export const authApi = createApi({
     credentials: 'include',
   }),
   endpoints: (builder) => ({
-    login: builder.mutation({
+    login: builder.mutation<{ message: string; user: UserPayload }, { idToken: string }>({
       query: (credentials) => ({
         url: API_CONFIG.endpoints.auth.login,
         method: 'POST',
         body: credentials,
       }),
     }),
-    // ✅ Fix: Add <void, void> to specify return type and argument type
-    logout: builder.mutation<void, void>({
+    logout: builder.mutation<{ message: string }, void>({
       query: () => ({
         url: API_CONFIG.endpoints.auth.logout,
         method: 'POST',
       }),
     }),
-    getMe: builder.query({
+    getMe: builder.query<{ user: UserPayload }, void>({
       query: () => API_CONFIG.endpoints.auth.me,
     }),
   }),
 });
 
-export const {
-  useLoginMutation,
-  useLogoutMutation,
-  useGetMeQuery,
-} = authApi;
+export const { useLoginMutation, useLogoutMutation, useGetMeQuery } = authApi;
